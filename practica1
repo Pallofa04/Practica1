@@ -1,3 +1,13 @@
 #!/bin/bash
+#1. Agafem les línies que comencin per tm o ts
+awk -F',' '/^tm|^ts/;{$1};END{print}' titles.cvs>titles1.cvs 
+wcoriginal=$(wc -l titles.cvs | cut -d" " -f1)
+wc1=$(wc -l titles1.cvs | cut -d" " -f1)
+linies_eliminades=$[$wcoriginal - $wc1] 
+echo $linies_eliminades
 #
-awk '
+#2. Agafem les línies que el títol comenci per alfanumèrics i #,",',¿,¡
+awk -F',' '{ if ($2 ~ "[0-9]" or "[A-Z]" or "[a-z]") print $2}' titles1.cvs
+echo $(wc -l titles1.cvs)
+
+
