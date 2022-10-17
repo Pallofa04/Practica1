@@ -1,13 +1,32 @@
 #!/bin/bash
 #1. Agafem les línies que comencin per tm o ts
-awk -F',' '/^tm|^ts/;{$1};END{print}' titles.cvs>titles1.cvs 
+grep  ^t[ms] titles.cvs  > titles1.cvs
 wcoriginal=$(wc -l titles.cvs | cut -d" " -f1)
 wc1=$(wc -l titles1.cvs | cut -d" " -f1)
 linies_eliminades=$[$wcoriginal - $wc1] 
-echo $linies_eliminades
+echo Les línies eliminades són $linies_eliminades.
 #
-#2. Agafem les línies que el títol comenci per alfanumèrics i #,",',¿,¡
-awk -F',' '{ if ($2 ~ "[0-9]" or "[A-Z]" or "[a-z]") print $2}' titles1.cvs
-echo $(wc -l titles1.cvs)
-
+#2. Agafem les línies que el títol comenci per alfanumèrics
+awk -F',' '{ if ($2 ~ /^[a-z A-Z 0-9]/) print $0 }' titles1.cvs>titles2.cvs
+#
+#3. Separar continguts entre Movies.cvs i Series.cvs
+awk -F',' '{ if ($1 ~ /^tm/) print $0}' titles2.cvs>Movies.cvs
+awk -F',' '{ if ($1 ~ /^ts/) print $0}' titles2.cvs>Series.cvs
+echo Les línies del arxiu anterior són $(echo $(wc -l titles2.cvs | cut -d" " -f1)) i si sumem les línies de Movies.cvs i Series.cvs podem veure que són les mateixes.
+wcm=$(wc -l Movies.cvs | cut -d" " -f1)
+wcs=$(wc -l Series.cvs | cut -d" " -f1)
+liniesms=$[$wcm + $wcs]
+echo $wcm + $wcs = $liniesms
+#
+#4. Eliminar camps 12, 13, 14 i 15 buits
+awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "")) print $0 }' Movies.cvs>Movies_net.cvs
+awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "")) print $0 }' Series.cvs>Series_net.cvs
+wcm_net=$(wc -l Movies_net.cvs | cut -d" " -f1)
+wcs_net=$(wc -l Series_net.cvs | cut -d" " -f1)
+linies_eliminadesm=$[$wcm - $wcm_net]
+linies_eliminadess=$[$wcs - $wcs_net]
+echo Les línies eliminades del arxiu Movies.cvs són $(echo $linies_eliminadesm) i del arxiu Series.cvs són $(echo $linies_eliminadess).
+#
+#5. Definim un índex que relacioni la nota donada a un contingut amb la seva popularitat relativa
+#Arxiu Movies_net.cvs
 
