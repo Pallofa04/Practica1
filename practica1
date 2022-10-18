@@ -29,4 +29,15 @@ echo Les línies eliminades del arxiu Movies.cvs són $(echo $linies_eliminadesm
 #
 #5. Definim un índex que relacioni la nota donada a un contingut amb la seva popularitat relativa
 #Arxiu Movies_net.cvs
+max_vot_movies=$( awk -F',' 'BEGIN{max=0};{if ($13>max) max=$13};END{print max}' Movies_net.cvs)
+max_pop_movies=$( awk -F',' 'BEGIN{max=0};{if ($14>max) max=$14};END{print max}' Movies_net.cvs)
+echo $max_vot_movies
+echo $max_pop_movies
+awk -F',' -v imdb_reliability=$16 -v tmdb_reliability=$17 'BEGIN{OFS=","};{$16=($13 / $'$max_vot_movie')};{$17=($14 / $'$max_pop_movies')};{print $0}' Movies_net.cvs>Movies_net_extra.cvs
+#Arxiu Series_net.cvs
+max_vot_series=$( awk -F',' 'BEGIN{max=0};{if ($13>max) max=$13};END{print max}' Series_net.cvs)
+max_pop_series=$( awk -F',' 'BEGIN{max=0};{if ($14>max) max=$14};END{print max}' Movies_net.cvs)
+echo $max_vot_series
+echo $max_pop_series
+awk -F',' -v imdb_reliability=$16 -v tmdb_reliability=$17 'BEGIN{OFS=","};{$16=($13 / $'$max_vot_movie')};{$17=($14 / $'$max_pop_movies')};{print $0}' Series_net.cvs>Series_net_extra.cvs
 
