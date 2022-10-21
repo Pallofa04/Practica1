@@ -1,14 +1,20 @@
 #!/bin/bash
+
+
 #1. Agafem les línies que comencin per tm o ts
 grep  ^t[ms] titles.cvs  > titles1.cvs
 wcoriginal=$(wc -l titles.cvs | cut -d" " -f1)
 wc1=$(wc -l titles1.cvs | cut -d" " -f1)
 linies_eliminades=$[$wcoriginal - $wc1] 
 echo Les línies eliminades són $linies_eliminades.
-#
+
+
+
 #2. Agafem les línies que el títol comenci per alfanumèrics
 awk -F',' '{ if ($2 ~ /^[a-z A-Z 0-9]/) print $0 }' titles1.cvs>titles2.cvs
-#
+
+
+
 #3. Separar continguts entre Movies.cvs i Series.cvs
 awk -F',' '{ if ($1 ~ /^tm/) print $0}' titles2.cvs>Movies.cvs
 awk -F',' '{ if ($1 ~ /^ts/) print $0}' titles2.cvs>Series.cvs
@@ -17,7 +23,9 @@ wcm=$(wc -l Movies.cvs | cut -d" " -f1)
 wcs=$(wc -l Series.cvs | cut -d" " -f1)
 liniesms=$[$wcm + $wcs]
 echo $wcm + $wcs = $liniesms
-#
+
+
+
 #4. Eliminar camps 12, 13, 14 i 15 buits
 awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "")) print $0 }' Movies.cvs>Movies_net.cvs
 awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "")) print $0 }' Series.cvs>Series_net.cvs
@@ -26,18 +34,19 @@ wcs_net=$(wc -l Series_net.cvs | cut -d" " -f1)
 linies_eliminadesm=$[$wcm - $wcm_net]
 linies_eliminadess=$[$wcs - $wcs_net]
 echo Les línies eliminades del arxiu Movies.cvs són $(echo $linies_eliminadesm) i del arxiu Series.cvs són $(echo $linies_eliminadess).
-#
+
+
 #5. Definim un índex que relacioni la nota donada a un contingut amb la seva popularitat relativa
 #Arxiu Movies_net.cvs
 max_vot_movies=$( awk -F',' 'BEGIN{max=0};{if ($13>max) max=$13};END{print max}' Movies_net.cvs)
 max_pop_movies=$( awk -F',' 'BEGIN{max=0};{if ($14>max) max=$14};END{print max}' Movies_net.cvs)
 echo $max_vot_movies
 echo $max_pop_movies
-awk -F',' -v imdb_reliability=$16 -v tmdb_reliability=$17 'BEGIN{OFS=","};{$16=($13 / $'$max_vot_movie')};{$17=($14 / $'$max_pop_movies')};{print $0}' Movies_net.cvs>Movies_net_extra.cvs
+awk -F',' -v max_v_m=$max_vot_movies -v max_p_m=$max_pop_movies 'BEGIN{OFS=","};{$16=$13/max_v_m ;$17=$14/max_p_m};{print $0}' Movies_net.cvs>Movies_net_extra.cvs
 #Arxiu Series_net.cvs
 max_vot_series=$( awk -F',' 'BEGIN{max=0};{if ($13>max) max=$13};END{print max}' Series_net.cvs)
 max_pop_series=$( awk -F',' 'BEGIN{max=0};{if ($14>max) max=$14};END{print max}' Movies_net.cvs)
 echo $max_vot_series
 echo $max_pop_series
-awk -F',' -v imdb_reliability=$16 -v tmdb_reliability=$17 'BEGIN{OFS=","};{$16=($13 / $'$max_vot_movie')};{$17=($14 / $'$max_pop_movies')};{print $0}' Series_net.cvs>Series_net_extra.cvs
+awk -F',' -v max_v_s=$max_vot_series -v max_p_s=$max_pop_series 'BEGIN{OFS=","};{$16=$13/max_v_s ;$17=$14/max_p_s};{print $0}' Series_net.cvs>Series_net_extra.cvs
 
