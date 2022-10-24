@@ -27,8 +27,8 @@ echo $wcm + $wcs = $liniesms
 
 
 #4. Eliminar camps 12, 13, 14 i 15 buits
-awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "")) print $0 }' Movies.cvs>Movies_net.cvs
-awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "")) print $0 }' Series.cvs>Series_net.cvs
+awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "") && ($15 != "")) print $0 }' Movies.cvs>Movies_net.cvs
+awk -F',' '{ if (($12 != "") && ($13 != "") && ($14 != "") && ($15 != "")) print $0 }' Series.cvs>Series_net.cvs
 wcm_net=$(wc -l Movies_net.cvs | cut -d" " -f1)
 wcs_net=$(wc -l Series_net.cvs | cut -d" " -f1)
 linies_eliminadesm=$[$wcm - $wcm_net]
@@ -36,17 +36,88 @@ linies_eliminadess=$[$wcs - $wcs_net]
 echo Les línies eliminades del arxiu Movies.cvs són $(echo $linies_eliminadesm) i del arxiu Series.cvs són $(echo $linies_eliminadess).
 
 
-#5. Definim un índex que relacioni la nota donada a un contingut amb la seva popularitat relativa
+
+#5. Definir un índex que relacioni la nota donada a un contingut amb la seva popularitat relativa
+
 #Arxiu Movies_net.cvs
-max_vot_movies=$( awk -F',' 'BEGIN{max=0};{if ($13>max) max=$13};END{print max}' Movies_net.cvs)
-max_pop_movies=$( awk -F',' 'BEGIN{max=0};{if ($14>max) max=$14};END{print max}' Movies_net.cvs)
+max_vot_movies=$( awk -F',' 'BEGIN{max=0};{if ($13>max) {max=$13}};END{print max}' Movies_net.cvs)
+max_pop_movies=$( awk -F',' 'BEGIN{max=0};{if ($14>max) {max=$14}};END{print max}' Movies_net.cvs)
 echo $max_vot_movies
 echo $max_pop_movies
-awk -F',' -v max_v_m=$max_vot_movies -v max_p_m=$max_pop_movies 'BEGIN{OFS=","};{$16=$13/max_v_m ;$17=$14/max_p_m};{print $0}' Movies_net.cvs>Movies_net_extra.cvs
+awk -F',' -v max_v_m=$max_vot_movies -v max_p_m=$max_pop_movies 'BEGIN{OFS=","};{$16=$13/max_v_m; $17=$14/max_p_m};{print $0}' Movies_net.cvs>Movies_net_extra.cvs
+
+
 #Arxiu Series_net.cvs
-max_vot_series=$( awk -F',' 'BEGIN{max=0};{if ($13>max) max=$13};END{print max}' Series_net.cvs)
-max_pop_series=$( awk -F',' 'BEGIN{max=0};{if ($14>max) max=$14};END{print max}' Movies_net.cvs)
+max_vot_series=$( awk -F',' 'BEGIN{max=0};{if ($13>max) {max=$13}};END{print max}' Series_net.cvs)
+max_pop_series=$( awk -F',' 'BEGIN{max=0};{if ($14>max) {max=$14}};END{print max}' Movies_net.cvs)
 echo $max_vot_series
 echo $max_pop_series
-awk -F',' -v max_v_s=$max_vot_series -v max_p_s=$max_pop_series 'BEGIN{OFS=","};{$16=$13/max_v_s ;$17=$14/max_p_s};{print $0}' Series_net.cvs>Series_net_extra.cvs
+awk -F',' -v max_v_s=$max_vot_series -v max_p_s=$max_pop_series 'BEGIN{OFS=","};{$16=$13/max_v_s; $17=$14/max_p_s};{print $0}' Series_net.cvs>Series_net_extra.cvs
 
+
+
+#6. Fer tests per comprovar si els datasets obtinguts són correctes
+
+#IMDB
+
+#a) Quina pel·lícula té la millor puntuació IMDB?
+
+awk -F',' 'BEGIN{max12=0; max1=0; max2=0; max9=0};{if ($12>max) {max12=$12; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max12}' Movies_net_extra.cvs>Test1.cvs
+cat Test1.cvs
+
+#b) Quina sèrie te la millor puntuació IMDB?
+
+awk -F',' 'BEGIN{max12=0; max1=0; max2=0; max9=0};{if ($12>max) {max12=$12; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max12}' Series_net_extra.cvs>Test2.cvs
+cat Test2.cvs
+
+#c) Quina és la pel·lícula més popular segons IMDB?
+
+awk -F',' 'BEGIN{max13=0; max1=0; max2=0; max9=0};{if ($13>max) {max13=$13; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max13}' Movies_net_extra.cvs>Test3.cvs
+cat Test3.cvs
+
+#d) Quina és la sèrie  més popular segons IMDB?
+
+awk -F',' 'BEGIN{max13=0; max1=0; max2=0; max9=0};{if ($13>max) {max13=$13; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max13}' Series_net_extra.cvs>Test4.cvs
+cat Test4.cvs
+
+#e) Quina pel·lícula té el millor coeficient de fiabilitat IMDB?
+
+awk -F',' 'BEGIN{max16=0; max1=0; max2=0; max9=0};{if ($16>max) {max16=$16; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max16}' Movies_net_extra.cvs>Test5.cvs
+cat Test5.cvs
+
+#f) Quina sèrie té el millor coeficient de fiablitat IMDB?
+
+awk -F',' 'BEGIN{max13=0; max1=0; max2=0; max9=0};{if ($16>max) {max13=$13; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max16}' Series_net_extra.cvs>Test6.cvs
+cat Test6.cvs
+
+#TMDB
+
+#a) Quina pel·lícula té la millor puntuació TMDB?
+
+awk -F',' 'BEGIN{max15=0; max1=0; max2=0; max9=0};{if ($15>max) {max15=$15; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max15}' Movies_net_extra.cvs>Test7.cvs
+cat Test7.cvs
+
+#b) Quina sèrie te la millor puntuació TMDB?
+
+awk -F',' 'BEGIN{max15=0; max1=0; max2=0; max9=0};{if ($15>max) {max15=$15; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max15}' Series_net_extra.cvs>Test8.cvs
+cat Test8.cvs
+
+#c) Quina és la pel·lícula més popular segons TMDB?
+
+awk -F',' 'BEGIN{max14=0; max1=0; max2=0; max9=0};{if ($14>max) {max14=$14; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max14}' Movies_net_extra.cvs>Test9.cvs
+cat Test9.cvs
+
+#d) Quina és la sèrie  més popular segons TMDB?
+
+awk -F',' 'BEGIN{max14=0; max1=0; max2=0; max9=0};{if ($14>max) {max14=$14; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max14}' Series_net_extra.cvs>Test10.cvs
+cat Test10.cvs
+
+#e) Quina pel·lícula té el millor coeficient de fiabilitat TMDB?
+
+awk -F',' 'BEGIN{max17=0; max1=0; max2=0; max9=0};{if ($17>max) {max17=$17; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max17}' Movies_net_extra.cvs>Test11.cvs
+cat Test11.cvs
+
+#f) Quina sèrie té el millor coeficient de fiablitat TMDB?
+
+awk -F',' 'BEGIN{max17=0; max1=0; max2=0; max9=0};{if ($17>max) {max17=$17; max1=$1; max2=$2; max9=$9}};END{print max1,max2,max9,max17}' Series_net_extra.cvs>Test12.cvs
+cat Test12.cvs
