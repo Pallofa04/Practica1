@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if  [$#-eq0];then
+if  [ $# -eq 0 ];then
 
    #1. Agafem les línies que comencin per tm o ts
    grep  ^t[ms] titles.cvs  > titles1.cvs
@@ -127,7 +127,7 @@ else
 
    Varm=$(grep $1 Movies.cvs)
    Vars=$(grep $1 Series.cvs)
-   if [$Varm=="" && $Vars==""];then
+   if [ -z "$Varm" ] && [ -z "$Vars" ];then
       Echo No hi ha coincidències
    else
       echo $Varm
