@@ -127,8 +127,8 @@ else
 
    Varm=$(grep $1 Movies.cvs)
    Vars=$(grep $1 Series.cvs)
-   if [ -z "$Varm" ] && [ -z "$Vars" ];then
-      Echo No hi ha coincidències
+   if [ -z "$Varm" ] && [ -z "$Vars" ];then #-z significa que si el valor te  0 caracters...
+      echo No hi ha coincidències
    else
       echo $Varm
       echo $Vars
